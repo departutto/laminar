@@ -1,9 +1,9 @@
 # Electrophysiological recordings with a laminar electrode.
 
 <ul>
-<li>Description of all parameters used to do spike sorting with KlustaViewa is available at https://github.com/klusta-team/klustakwik/ (last available on March 22, 2016).</li>
+<li>Description of all parameters used to do spike sorting with KlustaViewa is available <a href="https://github.com/klusta-team/klustakwik/">here</a> (last available on March 22, 2016).</li>
 
-<li>Description of Python package <i>phy</i> aimed at carrying out spike sorting and ephys data analysis is available at http://phy.readthedocs.org/en/latest/ (last available on March 22, 2016).</li>
+<li>Description of Python package <i>phy</i> aimed at carrying out spike sorting and ephys data analysis is available <a href="http://phy.readthedocs.org/en/latest/">here</a> (last available on March 22, 2016).</li>
 
 <li>KlustaViewa's Google discussion group is available <a href="https://groups.google.com/forum/#!forum/klustaviewas">here</a> (last available on March 22, 2016).</li>
 
