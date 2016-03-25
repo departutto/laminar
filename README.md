@@ -22,7 +22,7 @@
   
 </li>
 
-<br><br>
+<br>
 
 <li> List of related publications/reports/datasheets:
 
