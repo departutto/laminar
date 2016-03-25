@@ -15,12 +15,14 @@
     <li><a href="http://phy.readthedocs.org/en/latest/">Description of Python package <i>phy</i> aimed at carrying out spike sorting
     and ephys data analysis</a> (last accessed on March 22, 2016).</li>
 
-    <li><a href="https://groups.google.com/forum/#!forum/klustaviewas">Google discussion group</a> (last accessed on March 22,   
-    2016).</li>
+    <li><a href="https://groups.google.com/forum/#!forum/klustaviewas">KlustaViewa's Google discussion group</a> (last accessed on
+    March 22, 2016).</li>
 
   </ul>
   
 </li>
+
+<br><br>
 
 <li> List of related publications/reports/datasheets:
 
