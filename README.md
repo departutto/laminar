@@ -22,6 +22,10 @@
   
 </li>
 
+<br> 
+
+<li><a href="http://neuralynx.com/research_software/file_converters_and_utilities/">Utilities to import Neuralynx files into Matlab workspace.</a></li>
+
 <br>
 
 <li> List of related publications/reports/datasheets:
@@ -37,9 +41,5 @@
   </ul>
   
 </li>
-
-<br> 
-
-<li><a href="http://neuralynx.com/research_software/file_converters_and_utilities/">Utilities to import Neuralynx files into Matlab workspace.</a></li>
 
 </ul>
