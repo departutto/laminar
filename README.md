@@ -38,4 +38,6 @@
   
 </li>
 
+<li><a href="http://neuralynx.com/research_software/file_converters_and_utilities/">Utilities to import Neuralynx files into Matlab workspace</a></li>
+
 </ul>
