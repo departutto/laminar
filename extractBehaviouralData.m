@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Last modified on March 31, 2016.
+% Copyright by Dzmitry Kaliukhovich.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [trial, consolidated] = extractBehaviouralData(filename, varargin)
 
     [timestamps, ttls] = Nlx2MatEV(filename, [1 0 1 0 0], 0, 1, 1);
@@ -68,7 +75,7 @@ function [trial, consolidated] = extractBehaviouralData(filename, varargin)
         dt = dt / 10 ^ 3; 
         
         figure, plot(dt);
-        xlim([1 nTrials]), set(gca, 'XTick', [1 15:15:(nTrials - 1) nTrials]);
+        xlim([1 nTrials]), set(gca, 'XTick', [1 25:25:(nTrials - 1) nTrials]);
         xlabel('trial #'), ylabel('\it{dt}\rm = last photocell event - first photocell event, ms');        
         title(['(min; mean; median; max) of \it{dt}\rm = ' sprintf('(%.2f; %.2f; %.2f; %.2f) ms', [min(dt) mean(dt) median(dt) max(dt)])]);
 

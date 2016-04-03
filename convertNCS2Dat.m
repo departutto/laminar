@@ -1,3 +1,10 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Last modified on March 31, 2016.
+% Copyright by Dzmitry Kaliukhovich.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [signal, timeStamps, samplingFreq, headers, srcFileNames, srcDirectory] = convertNCS2Dat
     
     signal       = [];              % AD units.

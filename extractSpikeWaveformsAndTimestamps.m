@@ -1,5 +1,8 @@
-% Last modified on March 25, 2016.
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Last modified on March 31, 2016.
+% Copyright by Dzmitry Kaliukhovich.
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [filenameKWIK, directoryKWIK] = uigetfile('*.kwik', 'Select file with sorted spike waveforms (*.kwik)', cd, 'MultiSelect', 'off');
@@ -49,7 +52,7 @@ nClusters = length(clusterIdentifiers);
 % Number of detected spikes in each cluster.
 nSpikes = [];
 
-% String description of all derived clusters in a form "Cluster # (Number of detected spikes)".
+% String description of all retrieved clusters in a form "Cluster # (Number of detected spikes)".
 clusterDescriptors = {};
 
 for counter = 1:nClusters
@@ -58,7 +61,7 @@ for counter = 1:nClusters
     clusterDescriptors{end + 1} = [num2str(currentCluster) ' (' num2str(nSpikes(counter)) ')'];
 end
 
-% Display a list selection dialog box with all the derived clusters.
+% Display a list selection dialog box with all the retrieved clusters.
 [selection, ok]  = listdlg('PromptString', 'Select a cluster (or clusters)', ...
                            'SelectionMode', 'multiple', ...
                            'ListString', clusterDescriptors); 
@@ -98,13 +101,13 @@ if ~strcmp(button, 'Yes')
     return;
 end
 
-[filenameMAT, directoryMAT] = uigetfile('*.mat', 'Select file with timestamps (*.mat)', cd, 'MultiSelect', 'off');
+[filenameMAT, directoryMAT] = uigetfile('*.mat', 'Select file with timestamps (*.mat)', fileparts(fullpathKWIK), 'MultiSelect', 'off');
 fullpathMAT                 = [directoryMAT filenameMAT];
 clear button filenameMAT directoryMAT;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-% Retrive a list of variable names stored in the specified .mat file.
+% Retrieve a list of variable names stored in the specified .mat file.
 info = whos('-file', fullpathMAT);
 vars = {info(1:end).name};
 
