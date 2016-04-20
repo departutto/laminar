@@ -10,7 +10,6 @@ function statistics = examineAdaptation
     statistics     = responseNormalization(statistics);
 
     showNumberOfAnalyzedSites(statistics);
-    
     showResponsesInRepetitionTrials(statistics, [68547 68430 68481 68474], 1);    % V1 
     showResponsesInRepetitionTrials(statistics, [68547 68520 68481], 2);          % LI       
     
@@ -25,6 +24,15 @@ function statistics = examineAdaptation
     showHistogramsForRepetitionTrials(statistics, 68547, 2);                      % LI
     showHistogramsForRepetitionTrials(statistics, 68520, 2);                      % LI
     showHistogramsForRepetitionTrials(statistics, 68481, 2);                      % LI
+    
+    assessResponseModulationByStimulusRepetition(statistics, 68547, 1);           % V1
+    assessResponseModulationByStimulusRepetition(statistics, 68430, 1);           % V1
+    assessResponseModulationByStimulusRepetition(statistics, 68481, 1);           % V1
+    assessResponseModulationByStimulusRepetition(statistics, 68474, 1);           % V1
+   
+    assessResponseModulationByStimulusRepetition(statistics, 68547, 2);           % LI
+    assessResponseModulationByStimulusRepetition(statistics, 68520, 2);           % LI
+    assessResponseModulationByStimulusRepetition(statistics, 68481, 2);           % LI
     
 end
 
@@ -338,5 +346,99 @@ function showHistogram(adapterStim, testStim, xrange, step, strTitle)
     xlim(xrange), xlabel('normalized net response to adapter');
     ylim(yrange), ylabel('% response suppression');
     title(strTitle);
+    
+end
+
+function showStatisticsOnResponseModulation(coeffs, ratIdentifier, brainArea, description)
+
+    areaLabels  = {'V1', 'LI', 'TO', 'UNKNOWN'};
+    nDataPoints = sum(~isnan(coeffs));
+    
+    singleStimuli = coeffs(~isnan(coeffs(:, 1)), 1);
+    twoDifferent  = coeffs(~isnan(coeffs(:, 2)), 2);
+    twoIdentical  = coeffs(~isnan(coeffs(:, 3)), 3);
+    allTogether   = coeffs(~isnan(coeffs(:, 4)), 4);
+    
+    disp('---------------------------------------------------------------------');
+    disp(['Description: ' description]);
+    disp(['Rat = ' num2str(ratIdentifier) ', Brain area = ' areaLabels{brainArea}]);
+    
+    disp(['Number of analyzed multi-unit sites: ']);
+    disp(['N(single stimuli) = '          num2str(length(singleStimuli))]);
+    disp(['N(two different stimuli) = '   num2str(length(twoDifferent))]);
+    disp(['N(two identical stimuli) = '   num2str(length(twoIdentical))]);
+    disp(['N(all conditions together) = ' num2str(length(allTogether))]);
+    
+    disp(['Mean percent response suppression: ']);
+    disp(['% suppression(single stimuli) = '          num2str(mean(singleStimuli))]);
+    disp(['% suppression(two different stimuli) = '   num2str(mean(twoDifferent))]);
+    disp(['% suppression(two identical stimuli) = '   num2str(mean(twoIdentical))]);
+    disp(['% suppression(all conditions together) = ' num2str(mean(allTogether))]);
+    
+    disp(['p-values as tested against 50.0%: ']);
+    disp(['% suppression(single stimuli) = '          num2str(signrank(singleStimuli, 50.0))]);
+    disp(['% suppression(two different stimuli) = '   num2str(signrank(twoDifferent,  50.0))]);
+    disp(['% suppression(two identical stimuli) = '   num2str(signrank(twoIdentical,  50.0))]);
+    disp(['% suppression(all conditions together) = ' num2str(signrank(allTogether,   50.0))]);
+    
+end
+
+function [earlyCoeffs, lateCoeffs] = assessResponseModulationByStimulusRepetition(statistics, ratIdentifier, brainArea) 
+    
+    % Only significant excitatory response in the full analysis window.
+    selectionAll   = statistics(:, 2) == ratIdentifier & statistics(:, 3) == brainArea & statistics(:, 15) < 0.05 & statistics(:, 16) > 0;
+    selectionEarly = selectionAll & ~(statistics(:, 30) < 0 & statistics(:, 31) < 0);
+    selectionLate  = selectionAll & ~(statistics(:, 32) < 0 & statistics(:, 33) < 0);
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    sitesEarly  = unique(statistics(selectionEarly, 1));
+    earlyCoeffs = [];
+    for counter = 1:length(sitesEarly)
+        currSelection = statistics(:, 1) == sitesEarly(counter) & selectionEarly;
+        conditions    = statistics(currSelection, 4);
+        % Normalized net responses to the adapter and test stimuli in repetition trials.
+        adapterStim   = statistics(currSelection, 30);
+        testStim      = statistics(currSelection, 31);
+        % Different selections of stimulus conditions.
+        singleStimuli = ismember(conditions, 1:6);
+        twoDifferent  = ismember(conditions, 7:12);
+        twoIdentical  = ismember(conditions, 13:15);
+        nPoints       = [sum(singleStimuli) sum(twoDifferent) sum(twoIdentical) sum(currSelection)];
+        % Number of stimulus conditions showing response suppression.
+        nSuppression  = [sum(adapterStim(singleStimuli) > testStim(singleStimuli)) ...
+                         sum(adapterStim(twoDifferent)  > testStim(twoDifferent))  ...
+                         sum(adapterStim(twoIdentical)  > testStim(twoIdentical))  ...
+                         sum(adapterStim > testStim)];
+        earlyCoeffs(end + 1, :) = 100.0 * nSuppression ./ nPoints;
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    sitesLate  = unique(statistics(selectionLate, 1));
+    lateCoeffs = [];
+    for counter = 1:length(sitesLate)
+        currSelection = statistics(:, 1) == sitesLate(counter) & selectionLate;
+        conditions    = statistics(currSelection, 4);
+        % Normalized net responses to the adapter and test stimuli in repetition trials.
+        adapterStim   = statistics(currSelection, 32);
+        testStim      = statistics(currSelection, 33);
+        % Different selections of stimulus conditions.
+        singleStimuli = ismember(conditions, 1:6);
+        twoDifferent  = ismember(conditions, 7:12);
+        twoIdentical  = ismember(conditions, 13:15);
+        nPoints       = [sum(singleStimuli) sum(twoDifferent) sum(twoIdentical) sum(currSelection)];
+        % Number of stimulus conditions showing response suppression.
+        nSuppression  = [sum(adapterStim(singleStimuli) > testStim(singleStimuli)) ...
+                         sum(adapterStim(twoDifferent)  > testStim(twoDifferent))  ...
+                         sum(adapterStim(twoIdentical)  > testStim(twoIdentical))  ...
+                         sum(adapterStim > testStim)];
+        lateCoeffs(end + 1, :) = 100.0 * nSuppression ./ nPoints;
+    end
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    showStatisticsOnResponseModulation(earlyCoeffs, ratIdentifier, brainArea, 'Early time window of 25-175 ms');
+    showStatisticsOnResponseModulation(lateCoeffs,  ratIdentifier, brainArea, 'Late time window of 175-325 ms');
     
 end
