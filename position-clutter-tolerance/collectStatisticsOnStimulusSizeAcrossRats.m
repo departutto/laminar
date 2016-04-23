@@ -31,7 +31,7 @@ function collectStatisticsOnStimulusSizeAcrossRats(statistics, stimulus_size, ar
             
             fprintf('\n\nRat = %5d, Brain area = %s, N(sites) = %02d\n', currRat, area_labels{counterArea}, nSites);
             
-            showDescriptiveStatistics('Position #1', position1);
+            showDescriptiveStatistics('Position #1',  position1);
             showDescriptiveStatistics('Position #2:', position2);
             showDescriptiveStatistics('Both position combined:', [position1; position2]);
             showDescriptiveStatistics('abs(Position #1 - Position #2):', position1 - position2);
@@ -70,6 +70,16 @@ function collectStatisticsOnStimulusSizeAcrossRats(statistics, stimulus_size, ar
     
     compareTwoSelections('V1 versus LI across rats:', [position1V1 position2V1], [position1LI position2LI]);
     
+    rat68481V1 = selectSiteIdentifiers(statistics, 68481, 1);
+    rat68481LI = selectSiteIdentifiers(statistics, 68481, 2);
+    compareTwoSelections('V1 versus LI in rat 68481:', [stimulus_size(rat68481V1, 2:3) stimulus_size(rat68481V1, 4:5)], ...
+                                                       [stimulus_size(rat68481LI, 2:3) stimulus_size(rat68481LI, 4:5)]);
+   
+    rat68547V1 = selectSiteIdentifiers(statistics, 68547, 1);
+    rat68547LI = selectSiteIdentifiers(statistics, 68547, 2);
+    compareTwoSelections('V1 versus LI in rat 68481:', [stimulus_size(rat68547V1, 2:3) stimulus_size(rat68547V1, 4:5)], ...
+                                                       [stimulus_size(rat68547LI, 2:3) stimulus_size(rat68547LI, 4:5)]);
+    
 end
 
 function [siteIds, nSites] = selectSiteIdentifiers(statistics, rats, areas)
@@ -105,12 +115,34 @@ function compareTwoSelections(description, data1, data2)
     fprintf('N(data points) #1 ..... %d\n', size(data1, 1));
     fprintf('N(data points) #2 ..... %d\n', size(data2, 1));
     
-    horizontalAvg1 = (data1(:, 1) + data1(:, 3)) / 2.0;
-    verticalAvg1   = (data1(:, 2) + data1(:, 4)) / 2.0;
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
+    horizontalAvg1 = (data1(:, 1) + data1(:, 3)) / 2.0;
     horizontalAvg2 = (data2(:, 1) + data2(:, 3)) / 2.0;
+    pHorizontalAvg = ranksum(horizontalAvg1, horizontalAvg2);
+    
+    verticalAvg1   = (data1(:, 2) + data1(:, 4)) / 2.0;
     verticalAvg2   = (data2(:, 2) + data2(:, 4)) / 2.0;
+    pVerticalAvg   = ranksum(verticalAvg1, verticalAvg2);
     
     fprintf('Testing averages across the two positions:\n');
-    fprintf('Two-sided Mann-Whitney U test
+    fprintf('Two-sided Mann-Whitney U test:\n');
+    fprintf('Horizontal: p-value ... %6.3f\n', pHorizontalAvg);
+    fprintf('Vertical: p-value ..... %6.3f\n', pVerticalAvg);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    horizontalAll1 = [data1(:, 1); data1(:, 3)];
+    horizontalAll2 = [data2(:, 1); data2(:, 3)];
+    pHorizontalAll = ranksum(horizontalAll1, horizontalAll2);
+    
+    verticalAll1   = [data1(:, 2); data1(:, 4)];
+    verticalAll2   = [data2(:, 2); data2(:, 4)];
+    pVerticalAll   = ranksum(verticalAll1, verticalAll2);
+    
+    fprintf('Pooling across both positions:\n');
+    fprintf('Two-sided Mann-Whitney U test:\n');
+    fprintf('Horizontal: p-value ... %6.3f\n', pHorizontalAll);
+    fprintf('Vertical: p-value ..... %6.3f\n', pVerticalAll);
+    
 end
