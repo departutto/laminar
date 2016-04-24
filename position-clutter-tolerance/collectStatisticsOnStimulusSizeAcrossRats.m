@@ -127,8 +127,8 @@ function compareTwoSelections(description, data1, data2)
     
     fprintf('Testing averages across the two positions:\n');
     fprintf('Two-sided Mann-Whitney U test:\n');
-    fprintf('Horizontal: p-value ... %6.3f\n', pHorizontalAvg);
-    fprintf('Vertical: p-value ..... %6.3f\n', pVerticalAvg);
+    fprintf('Horizontal: p-value ... %.3f\n', pHorizontalAvg);
+    fprintf('Vertical: p-value ..... %.3f\n', pVerticalAvg);
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -142,7 +142,7 @@ function compareTwoSelections(description, data1, data2)
     
     fprintf('Pooling across both positions:\n');
     fprintf('Two-sided Mann-Whitney U test:\n');
-    fprintf('Horizontal: p-value ... %6.3f\n', pHorizontalAll);
-    fprintf('Vertical: p-value ..... %6.3f\n', pVerticalAll);
+    fprintf('Horizontal: p-value ... %.3f\n', pHorizontalAll);
+    fprintf('Vertical: p-value ..... %.3f\n', pVerticalAll);
     
 end
