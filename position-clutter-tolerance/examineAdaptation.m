@@ -25,14 +25,25 @@ function statistics = examineAdaptation
     showHistogramsForRepetitionTrials(statistics, 68520, 2);                      % LI
     showHistogramsForRepetitionTrials(statistics, 68481, 2);                      % LI
     
-    assessResponseModulationByStimulusRepetition(statistics, 68547, 1);           % V1
-    assessResponseModulationByStimulusRepetition(statistics, 68430, 1);           % V1
-    assessResponseModulationByStimulusRepetition(statistics, 68481, 1);           % V1
-    assessResponseModulationByStimulusRepetition(statistics, 68474, 1);           % V1
+    early68547V1 = assessResponseModulationByStimulusRepetition(statistics, 68547, 1);  % V1
+    early68430V1 = assessResponseModulationByStimulusRepetition(statistics, 68430, 1);  % V1
+    early68481V1 = assessResponseModulationByStimulusRepetition(statistics, 68481, 1);  % V1
+    early68474V1 = assessResponseModulationByStimulusRepetition(statistics, 68474, 1);  % V1
    
-    assessResponseModulationByStimulusRepetition(statistics, 68547, 2);           % LI
-    assessResponseModulationByStimulusRepetition(statistics, 68520, 2);           % LI
-    assessResponseModulationByStimulusRepetition(statistics, 68481, 2);           % LI
+    early68547LI = assessResponseModulationByStimulusRepetition(statistics, 68547, 2);  % LI
+    early68520LI = assessResponseModulationByStimulusRepetition(statistics, 68520, 2);  % LI
+    early68481LI = assessResponseModulationByStimulusRepetition(statistics, 68481, 2);  % LI
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    disp('Across all conditions, Early phase, Percent conditions with response suppression:');
+    disp(['Rat 68547, V1 versus LI: p-value = ' num2str(ranksum(early68547V1(:, 4), early68547LI(:, 4)))]);
+    disp(['Rat 68481, V1 versus LI: p-value = ' num2str(ranksum(early68481V1(:, 4), early68481LI(:, 4)))]);
+    V1 = [early68547V1(:, 4)' early68430V1(:, 4)' early68481V1(:, 4)' early68474V1(:, 4)'];
+    LI = [early68547LI(:, 4)' early68520LI(:, 4)' early68481LI(:, 4)'];
+    disp(['Across rats, V1 versus LI: p-value = ' num2str(ranksum(V1, LI))]);
+    disp([mean(V1) mean(LI)]);
+    disp([median(V1) median(LI)]);
     
 end
 
@@ -56,6 +67,7 @@ function statistics = collectResponses(sessionNames, ratIdentifiers, brainAreas)
     nConditions = 15;
     
     for currSession = 1:nSessions
+        
         fprintf('%03d: %s\n', currSession, sessionNames{currSession});
         load(sessionNames{currSession});
         
@@ -71,8 +83,6 @@ function statistics = collectResponses(sessionNames, ratIdentifiers, brainAreas)
         temporary = [];
         for currCondition = 1:nConditions
             
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
             % Select all presentations of a specified stimulus condition.
             conditionIndices = find(psths(:, 2) == currCondition);
             
@@ -80,7 +90,7 @@ function statistics = collectResponses(sessionNames, ratIdentifiers, brainAreas)
             adapterStimulus = find(psths(1:end - 1, 1) == psths(2:end, 1) & ...
                                    psths(1:end - 1, 2) == psths(2:end, 2) & ...
                                    psths(1:end - 1, 2) == currCondition);
-            testStimulus    = adapterStimulus + 1;
+            testStimulus    = adapterStimulus + 1;            
             if length(adapterStimulus) ~= nBlocks
                 error('Incorrect number of stimulus repetitions per condition!');
             end
@@ -108,10 +118,11 @@ function statistics = collectResponses(sessionNames, ratIdentifiers, brainAreas)
                                      mean(lateResp(adapterStimulus))   ...
                                      mean(lateResp(testStimulus))      ...
                                      signrank(baseline(conditionIndices), fullResp(conditionIndices), 'tail', 'left')];
-        end       
+        end
         statistics = [statistics; temporary];
         
         clear spikes psths temporary;    
+        
     end
 
 end
@@ -347,39 +358,60 @@ function showHistogram(adapterStim, testStim, xrange, step, strTitle)
     ylim(yrange), ylabel('% response suppression');
     title(strTitle);
     
+    indices = find(~isnan(bins(6:21))); % 1st bin - [-1; -0.8), 6th bin - [0; 0.2), 21st bin - [3.0; 3.2)
+    [rho, pvalue] = corr(indices', bins(5 + indices)', 'Type', 'Spearman'); 
+    disp(['Spearman rank correlation: [rho, p-value, N] = ' mat2str([rho, pvalue, length(indices)])]);
 end
 
 function showStatisticsOnResponseModulation(coeffs, ratIdentifier, brainArea, description)
 
     areaLabels  = {'V1', 'LI', 'TO', 'UNKNOWN'};
-    nDataPoints = sum(~isnan(coeffs));
+    nDataPoints = sum(~isnan(coeffs)); 
     
-    singleStimuli = coeffs(~isnan(coeffs(:, 1)), 1);
-    twoDifferent  = coeffs(~isnan(coeffs(:, 2)), 2);
-    twoIdentical  = coeffs(~isnan(coeffs(:, 3)), 3);
-    allTogether   = coeffs(~isnan(coeffs(:, 4)), 4);
+    singleStimuli = ~isnan(coeffs(:, 1));
+    twoDifferent  = ~isnan(coeffs(:, 2));
+    twoIdentical  = ~isnan(coeffs(:, 3));
+    allTogether   = ~isnan(coeffs(:, 4));
     
     disp('---------------------------------------------------------------------');
     disp(['Description: ' description]);
     disp(['Rat = ' num2str(ratIdentifier) ', Brain area = ' areaLabels{brainArea}]);
     
     disp(['Number of analyzed multi-unit sites: ']);
-    disp(['N(single stimuli) = '          num2str(length(singleStimuli))]);
-    disp(['N(two different stimuli) = '   num2str(length(twoDifferent))]);
-    disp(['N(two identical stimuli) = '   num2str(length(twoIdentical))]);
-    disp(['N(all conditions together) = ' num2str(length(allTogether))]);
+    disp(['N(single stimuli) = '          num2str(sum(singleStimuli))]);
+    disp(['N(two different stimuli) = '   num2str(sum(twoDifferent))]);
+    disp(['N(two identical stimuli) = '   num2str(sum(twoIdentical))]);
+    disp(['N(all conditions together) = ' num2str(sum(allTogether))]);
     
     disp(['Mean percent response suppression: ']);
-    disp(['% suppression(single stimuli) = '          num2str(mean(singleStimuli))]);
-    disp(['% suppression(two different stimuli) = '   num2str(mean(twoDifferent))]);
-    disp(['% suppression(two identical stimuli) = '   num2str(mean(twoIdentical))]);
-    disp(['% suppression(all conditions together) = ' num2str(mean(allTogether))]);
+    disp(['% suppression(single stimuli) = '          num2str(mean(coeffs(singleStimuli, 1)))]);
+    disp(['% suppression(two different stimuli) = '   num2str(mean(coeffs(twoDifferent,  2)))]);
+    disp(['% suppression(two identical stimuli) = '   num2str(mean(coeffs(twoIdentical,  3)))]);
+    disp(['% suppression(all conditions together) = ' num2str(mean(coeffs(allTogether,   4)))]);
     
     disp(['p-values as tested against 50.0%: ']);
-    disp(['% suppression(single stimuli) = '          num2str(signrank(singleStimuli, 50.0))]);
-    disp(['% suppression(two different stimuli) = '   num2str(signrank(twoDifferent,  50.0))]);
-    disp(['% suppression(two identical stimuli) = '   num2str(signrank(twoIdentical,  50.0))]);
-    disp(['% suppression(all conditions together) = ' num2str(signrank(allTogether,   50.0))]);
+    disp(['% suppression(single stimuli) = '          num2str(signrank(coeffs(singleStimuli, 1), 50.0))]);
+    disp(['% suppression(two different stimuli) = '   num2str(signrank(coeffs(twoDifferent,  2), 50.0))]);
+    disp(['% suppression(two identical stimuli) = '   num2str(signrank(coeffs(twoIdentical,  3), 50.0))]);
+    disp(['% suppression(all conditions together) = ' num2str(signrank(coeffs(allTogether,   4), 50.0))]);
+    
+    disp(['Mean adaptation index: ']);
+    disp(['Adaptation index(single stimuli) = '          num2str(mean(coeffs(singleStimuli, 5)))]);
+    disp(['Adaptation index(two different stimuli) = '   num2str(mean(coeffs(twoDifferent,  6)))]);
+    disp(['Adaptation index(two identical stimuli) = '   num2str(mean(coeffs(twoIdentical,  7)))]);
+    disp(['Adaptation index(all conditions together) = ' num2str(mean(coeffs(allTogether,   8)))]);
+    
+    disp(['Median adaptation index: ']);
+    disp(['Adaptation index(single stimuli) = '          num2str(median(coeffs(singleStimuli, 5)))]);
+    disp(['Adaptation index(two different stimuli) = '   num2str(median(coeffs(twoDifferent,  6)))]);
+    disp(['Adaptation index(two identical stimuli) = '   num2str(median(coeffs(twoIdentical,  7)))]);
+    disp(['Adaptation index(all conditions together) = ' num2str(median(coeffs(allTogether,   8)))]);
+    
+    disp(['p-values as tested against 0.0%: ']);
+    disp(['% suppression(single stimuli) = '          num2str(signrank(coeffs(singleStimuli, 5)))]);
+    disp(['% suppression(two different stimuli) = '   num2str(signrank(coeffs(twoDifferent,  6)))]);
+    disp(['% suppression(two identical stimuli) = '   num2str(signrank(coeffs(twoIdentical,  7)))]);
+    disp(['% suppression(all conditions together) = ' num2str(signrank(coeffs(allTogether,   8)))]);
     
 end
 
@@ -404,13 +436,16 @@ function [earlyCoeffs, lateCoeffs] = assessResponseModulationByStimulusRepetitio
         singleStimuli = ismember(conditions, 1:6);
         twoDifferent  = ismember(conditions, 7:12);
         twoIdentical  = ismember(conditions, 13:15);
-        nPoints       = [sum(singleStimuli) sum(twoDifferent) sum(twoIdentical) sum(currSelection)];
         % Number of stimulus conditions showing response suppression.
-        nSuppression  = [sum(adapterStim(singleStimuli) > testStim(singleStimuli)) ...
-                         sum(adapterStim(twoDifferent)  > testStim(twoDifferent))  ...
-                         sum(adapterStim(twoIdentical)  > testStim(twoIdentical))  ...
-                         sum(adapterStim > testStim)];
-        earlyCoeffs(end + 1, :) = 100.0 * nSuppression ./ nPoints;
+        nSuppression  = [100.0 * sum(adapterStim(singleStimuli) > testStim(singleStimuli)) / sum(singleStimuli)                  ...
+                         100.0 * sum(adapterStim(twoDifferent)  > testStim(twoDifferent)) / sum(twoDifferent)                    ...
+                         100.0 * sum(adapterStim(twoIdentical)  > testStim(twoIdentical)) / sum(twoIdentical)                    ...
+                         100.0 * sum(adapterStim > testStim)  / sum(currSelection)                                               ...
+                         mean(100.0 * (adapterStim(singleStimuli) - testStim(singleStimuli)) ./ abs(adapterStim(singleStimuli))) ...
+                         mean(100.0 * (adapterStim(twoDifferent) - testStim(twoDifferent)) ./ abs(adapterStim(twoDifferent)))    ...
+                         mean(100.0 * (adapterStim(twoIdentical) - testStim(twoIdentical)) ./ abs(adapterStim(twoIdentical)))    ...
+                         mean(100.0 * (adapterStim - testStim) ./ abs(adapterStim))];
+        earlyCoeffs(end + 1, :) = nSuppression;
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -427,13 +462,16 @@ function [earlyCoeffs, lateCoeffs] = assessResponseModulationByStimulusRepetitio
         singleStimuli = ismember(conditions, 1:6);
         twoDifferent  = ismember(conditions, 7:12);
         twoIdentical  = ismember(conditions, 13:15);
-        nPoints       = [sum(singleStimuli) sum(twoDifferent) sum(twoIdentical) sum(currSelection)];
         % Number of stimulus conditions showing response suppression.
-        nSuppression  = [sum(adapterStim(singleStimuli) > testStim(singleStimuli)) ...
-                         sum(adapterStim(twoDifferent)  > testStim(twoDifferent))  ...
-                         sum(adapterStim(twoIdentical)  > testStim(twoIdentical))  ...
-                         sum(adapterStim > testStim)];
-        lateCoeffs(end + 1, :) = 100.0 * nSuppression ./ nPoints;
+        nSuppression  = [100.0 * sum(adapterStim(singleStimuli) > testStim(singleStimuli)) / sum(singleStimuli)          ...
+                         100.0 * sum(adapterStim(twoDifferent)  > testStim(twoDifferent)) / sum(twoDifferent)            ...
+                         100.0 * sum(adapterStim(twoIdentical)  > testStim(twoIdentical)) / sum(twoIdentical)            ...
+                         100.0 * sum(adapterStim > testStim) / sum(currSelection)                                        ...
+                         mean(100.0 * (adapterStim(singleStimuli) - testStim(singleStimuli)) ./ abs(adapterStim(singleStimuli))) ...
+                         mean(100.0 * (adapterStim(twoDifferent) - testStim(twoDifferent)) ./ abs(adapterStim(twoDifferent)))    ...
+                         mean(100.0 * (adapterStim(twoIdentical) - testStim(twoIdentical)) ./ abs(adapterStim(twoIdentical)))    ...
+                         mean(100.0 * (adapterStim - testStim) ./ abs(adapterStim))];
+        lateCoeffs(end + 1, :) = nSuppression;
     end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
