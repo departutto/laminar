@@ -1,7 +1,7 @@
 function responses = examinePositionTolerance(statistics)
 
-    analysisWindow = 'late';  % early | late | full
-    selectionRule  = @selectionRule5;
+    analysisWindow = 'early';  % early | late | full
+    selectionRule  = @selectionRule3;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
@@ -18,15 +18,21 @@ function responses = examinePositionTolerance(statistics)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
     % Examine position tolerance in V1 in each rat separately.
-    positionTolerance(responses, 68430, 1, selectionRule);
-    positionTolerance(responses, 68474, 1, selectionRule);
-    positionTolerance(responses, 68481, 1, selectionRule);
-    positionTolerance(responses, 68547, 1, selectionRule);
+    rat68430V1 = positionTolerance(responses, 68430, 1, selectionRule);
+    rat68474V1 = positionTolerance(responses, 68474, 1, selectionRule);
+    rat68481V1 = positionTolerance(responses, 68481, 1, selectionRule);
+    rat68547V1 = positionTolerance(responses, 68547, 1, selectionRule);
     
     % Examine position tolerance in LI in each rat separately.
-    positionTolerance(responses, 68520, 2, selectionRule);
-    positionTolerance(responses, 68481, 2, selectionRule);
-    positionTolerance(responses, 68547, 2, selectionRule);
+    rat68520LI = positionTolerance(responses, 68520, 2, selectionRule);
+    rat68481LI = positionTolerance(responses, 68481, 2, selectionRule);
+    rat68547LI = positionTolerance(responses, 68547, 2, selectionRule);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    ratsV1     = [rat68430V1; rat68474V1; rat68481V1; rat68547V1];
+    ratsLI     = [rat68520LI; rat68481LI; rat68547LI];
+    matchSamples2TestPositionSelectivity(ratsV1, ratsLI, 'Across all rats: V1 vs. LI');
     
 end
 
@@ -196,7 +202,7 @@ function updatedResponses = selectAnalysisWindow(analysisWindow, statistics, res
     
 end
 
-function positionTolerance(responses, rats, area, selectionRule)
+function selectedResponses = positionTolerance(responses, rats, area, selectionRule)
 
     area_labels = {'V1', 'LI', 'TO', 'UNKNOWN'};
     description = ['Rat(s) = ' mat2str(rats) ', Area(s) = ' area_labels{area}];    
@@ -227,9 +233,9 @@ function positionTolerance(responses, rats, area, selectionRule)
         pvalues1  = [currSite(1, 5) currSite(3, 5) currSite(5, 5)];            
         pvalues2  = [currSite(2, 5) currSite(4, 5) currSite(6, 5)];
               
-        [best, worst] = selectionRule(position1, position2, pvalues1, pvalues2);
+        [best, worst, pbest, pworst] = selectionRule(position1, position2, pvalues1, pvalues2);
         if ~isempty(best)
-            selectedResponses(end + 1, :) = [best worst];
+            selectedResponses(end + 1, :) = [best worst pbest pworst];
         end
         
     end
@@ -267,6 +273,7 @@ function showResults(selectedResponses, description)
     pBest  = kruskalwallis(responsesBest, [], 'off');
     pWorst = kruskalwallis(responsesWorst, [], 'off');
     
+    fprintf('%s\n', description);
     fprintf('Kruskal-Wallis test: p-values(Best vs. Worst) = %.6f vs. %.6f\n', pBest, pWorst);
     fprintf('Two-sided Wilcoxon matched pairs tests:\n');
     fprintf('Best position:\n');
@@ -318,7 +325,7 @@ function [best, worst, pbest, pworst] = rankStimuli(position1, position2, pvalue
 end
 
 % No selection at all.
-function [best, worst] = selectionRule1(position1, position2, pvalues1, pvalues2)
+function [best, worst, pbest, pworst] = selectionRule1(position1, position2, pvalues1, pvalues2)
 
     [best, worst, pbest, pworst] = rankStimuli(position1, position2, pvalues1, pvalues2, 'oddeven');
     
@@ -327,13 +334,15 @@ end
 % Only significant excitatroy response to the most optimal stimulus
 % presented at the best position. In this way we make sure that the best
 % position is within a receptive field of an analyzed multi-unit site.
-function [best, worst] = selectionRule2(position1, position2, pvalues1, pvalues2)
+function [best, worst, pbest, pworst] = selectionRule2(position1, position2, pvalues1, pvalues2)
 
     [best, worst, pbest, pworst] = rankStimuli(position1, position2, pvalues1, pvalues2, 'oddeven');
     
     if pbest(1) >= 0.05
-        best  = [];
-        worst = [];
+        best   = [];
+        worst  = [];
+        pbest  = [];
+        pworst = [];
     end
     
 end
@@ -342,38 +351,81 @@ end
 % the best position and at least one significant excitatory response to any
 % stimulus presented at the worst position. In this way we make sure that
 % both position fall within a receptive field of an analyzed multi-unit site.
-function [best, worst] = selectionRule3(position1, position2, pvalues1, pvalues2)
+function [best, worst, pbest, pworst] = selectionRule3(position1, position2, pvalues1, pvalues2)
 
     [best, worst, pbest, pworst] = rankStimuli(position1, position2, pvalues1, pvalues2, 'oddeven');
     
     if pbest(1) >= 0.05 || (pworst(1) >= 0.05 && pworst(2) >= 0.05 && pworst(3) >= 0.05)
-        best  = [];
-        worst = [];
+        best   = [];
+        worst  = [];
+        pbest  = [];
+        pworst = [];
     end
     
 end
 
 % The same as selection #3 but also requiring stimulus selectivity at the
 % best position.
-function [best, worst] = selectionRule4(position1, position2, pvalues1, pvalues2)
+function [best, worst, pbest, pworst] = selectionRule4(position1, position2, pvalues1, pvalues2)
 
     [best, worst, pbest, pworst] = rankStimuli(position1, position2, pvalues1, pvalues2, 'oddeven');
     
     if pbest(1) >= 0.05 || (pworst(1) >= 0.05 && pworst(2) >= 0.05 && pworst(3) >= 0.05) || (max(best) - min(best)) < 0.1
-        best  = [];
-        worst = [];
+        best   = [];
+        worst  = [];
+        pbest  = [];
+        pworst = [];
     end
     
 end
 
 % The same as selection #3 but also requiring stimulus selectivity at both positions.
-function [best, worst] = selectionRule5(position1, position2, pvalues1, pvalues2)
+function [best, worst, pbest, pworst] = selectionRule5(position1, position2, pvalues1, pvalues2)
 
     [best, worst, pbest, pworst] = rankStimuli(position1, position2, pvalues1, pvalues2, 'oddeven');
     
     if pbest(1) >= 0.05 || (pworst(1) >= 0.05 && pworst(2) >= 0.05 && pworst(3) >= 0.05) || max(best) - min(best) < 0.1 || max(worst) - min(worst) < 0.1
-        best  = [];
-        worst = [];
+        best   = [];
+        worst  = [];
+        pbest  = [];
+        pworst = [];
     end
     
 end
+
+function matchSamples2TestPositionSelectivity(responses1, responses2, description)
+
+    % (Best stimulus at Best position - Best stimulus at Worst position) / Best stimulus at Best position.
+    coef1 = (responses1(:, 1) - responses1(:, 4)) ./ responses1(:, 1);
+    coef2 = (responses2(:, 1) - responses2(:, 4)) ./ responses2(:, 1);
+    
+    disp([length(coef1) length(coef2)]);
+
+    edges = -1.5:0.1:1.5;
+    bins1 = histc(coef1, edges);
+    bins2 = histc(coef2, edges);
+    
+    figure;
+    id1 = bar(edges, bins1 + bins2, 'histc');
+    hold on;
+    id2 = bar(edges, bins2, 'histc');
+    set(id1, 'FaceColor', 'red');
+    xlabel('coefficient'), ylabel('count');
+    xlim([edges(1) edges(end)]);
+    legend('Sample 1', 'Sample 2', 'Location', 'NorthWest');
+    title(description);
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
+    indices1 = coef1 < 0.7 & responses1(:, 4) > 0.4;
+    indices2 = coef2 < 0.7 & responses2(:, 4) > 0.4;
+
+    indices1 = coef1 > 0.7;
+    indices2 = coef2 > 0.7;
+    
+    showResults(responses1(indices1, :), 'Sample 1');
+    showResults(responses2(indices2, :), 'Sample 2');
+    
+end
+
+
