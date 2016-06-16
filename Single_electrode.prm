@@ -33,8 +33,8 @@ chunk_overlap = int(.015 * sample_rate)  # 15 ms
 # signal across the whole recording.
 nexcerpts = 50
 excerpt_size = int(1. * sample_rate)
-threshold_strong_std_factor = 4.5
-threshold_weak_std_factor = 2.
+threshold_strong_std_factor = 4.0
+threshold_weak_std_factor = 2.0
 detect_spikes = 'negative'
 #precomputed_threshold = None
 
