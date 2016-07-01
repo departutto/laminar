@@ -1,4 +1,4 @@
-function [pos1Hor, pos1Ver, pos2Hor, pos2Ver, sep] = stimulusSizeInDegrees(pos1Index, pos2Index, rightEdge, dist2Screen, height)
+function [pos1Hor, pos1Ver, pos2Hor, pos2Ver, sep] = computeSizeAndSeparationBetween2Stimuli(pos1Index, pos2Index, rightEdge, dist2Screen, height)
     
     % Screen dimensions in cm.
     screenHeightCm  = 32;
