@@ -51,8 +51,9 @@ rawSignal  = rawSignal(:)';
 
 % Align all timestamps with respect to the first recorded event. Then
 % convert all thus aligned timestamps to sec. 
-eventTimestamps = (eventTimestamps - eventTimestamps(1)) / 10.0 ^ 6; % sec
-lfpTimestamps   = (lfpTimestamps - eventTimestamps(1)) / 10.0 ^ 6;   % sec
+timeOrigin      = eventTimestamps(1);
+eventTimestamps = (eventTimestamps - timeOrigin) / 10.0 ^ 6; % sec
+lfpTimestamps   = (lfpTimestamps - timeOrigin) / 10.0 ^ 6;   % sec
 
 % Derive a timestamp for each sampled LFP signal data point.
 dt            = (1.0 / samplingFreq) * (0:(numRecord - 1))';
@@ -78,4 +79,4 @@ disp(header);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear fileName dirName channel frequency validSamples samplingFreq numRecord;
-clear dt dtStatistics adMaxValue inputRange;
+clear timeOrigin dt dtStatistics adMaxValue inputRange;
