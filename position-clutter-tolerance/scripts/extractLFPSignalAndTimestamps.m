@@ -1,4 +1,4 @@
-clc;
+clear all, clc;
 
 % Select Events file.
 [fileName, dirName] = uigetfile('*.nev', 'Select Events file (*.nev)');
@@ -8,7 +8,7 @@ end
 
 % Extract raw data from the Events file.
 [eventTimestamps, ttls] = Nlx2MatEV([dirName fileName], [1 0 1 0 0], 0, 1, 1);
-eventDescriptors        = bitshift(ttls, -2);
+eventDescriptors        = [bitand(ttls', 65280) bitand(ttls', 255)];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -23,14 +23,14 @@ end
 
 % Channel identifier.
 if length(unique(channel)) ~= 1
-    error('More than one unique channel identifier detected!');
+    error('More than one channel identifier detected!');
 else
     fprintf('Channel/File identifier.....CSC%d.ncs\n', unique(channel) + 1);
 end
 
 % Sampling frequency.
 if length(unique(frequency)) ~= 1
-    error('More than one unique sampling frequency detected!');
+    error('More than one sampling frequency detected!');
 else
     samplingFreq = unique(frequency);
     fprintf('Sampling frequency..........%d Hz\n', samplingFreq);

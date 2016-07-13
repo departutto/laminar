@@ -1,5 +1,5 @@
 % Photocell events.
-indices = find(eventDescriptors == 32);
+indices = find(eventDescriptors(:, 2) == 128)';
 
 % Time interval between two consecutive photocell events (presumably in sec).
 durations = eventTimestamps(indices(2:end)) - eventTimestamps(indices(1:end - 1));
@@ -18,17 +18,22 @@ nFragments = size(stimTimings, 2);
 
 % Number of data points per LFP fragment before and after stimulus onset.
 beforeOnset = 10000; % = 312.5 ms at the sampling frequency of 32 kHz.
-afterOnset  = 10000;
+beforeLabel = -313;
+afterOnset  = 10000; 
+afterLabel  = 313;
 
 % Retrieve LFP fragments per stimulus presentation.
 for counter = 1:nFragments
     stimOnset    = stimTimings(1, counter);
     [val, index] = min(abs(lfpTimestamps - stimOnset));
+    if index - beforeOnset < 1 || index + afterOnset > length(rawSignal)
+        continue;
+    end
     lfpFragments(end + 1, :) = rawSignal(index - beforeOnset:index + afterOnset);
 end
 
 % Compute visually evoked potentials.
-rawVEP      = mean(lfpFragments);
+rawVEP      = median(lfpFragments); % or mean!!!
 % Moving average with a time window of 20 ms (one period of 50-Hz oscillations).
 smoothedVEP = tsmovavg(rawVEP', 's', 640, 1);
 
@@ -37,12 +42,16 @@ figure;
 subplot(1, 2, 1), plot(rawVEP, '-b'), hold on;
 plot([beforeOnset + 1 beforeOnset + 1], get(gca, 'YLim'), '--k');
 xlim([1 beforeOnset + 1 + afterOnset]), set(gca, 'XTick', []);
-xlabel('timestamp'), ylabel('signal, uV'), title('Average VEP')
+set(gca, 'XTick', [1 beforeOnset + 1 beforeOnset + 1 + afterOnset]);
+set(gca, 'XTickLabel', {beforeLabel, 0, afterLabel});
+xlabel('time, ms'), ylabel('signal, uV'), title(['VEP: N = ' num2str(size(lfpFragments, 1)) ' LFP fragments'])
 
 subplot(1, 2, 2), plot(smoothedVEP, '-r'), hold on;
 plot([beforeOnset + 1 beforeOnset + 1], get(gca, 'YLim'), '--k');
 xlim([1 beforeOnset + 1 + afterOnset]), set(gca, 'XTick', []);
-xlabel('timestamp'), ylabel('signal, uV'), title('Smoothed average VEP');
+set(gca, 'XTick', [1 beforeOnset + 1 beforeOnset + 1 + afterOnset]);
+set(gca, 'XTickLabel', {beforeLabel, 0, afterLabel});
+xlabel('time, ms'), ylabel('signal, uV'), title('Smoothed VEP');
 
 % Clear all unnecessary variables.
 clear *ndices durations stimTimings nFragments *Onset counter val index;
