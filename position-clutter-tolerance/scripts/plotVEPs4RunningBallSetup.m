@@ -7,7 +7,7 @@ durations = eventTimestamps(indices(2:end)) - eventTimestamps(indices(1:end - 1)
 % Detect stimulus onset and offset (the cut-off values are in sec). The
 % first and second rows correspond to stimulus onset and offset.
 stimIndices = [indices(1:end - 1); indices(2:end)];
-stimIndices = stimIndices(:, durations >= 0.3 & durations <= 0.6);
+stimIndices = stimIndices(:, durations >= 0.46 & durations <= 0.49);
 stimTimings = [eventTimestamps(stimIndices(1, :)); eventTimestamps(stimIndices(2, :))];
 
 % Raw LFP fragments per stimulus presentation.
