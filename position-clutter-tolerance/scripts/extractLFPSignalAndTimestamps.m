@@ -69,7 +69,7 @@ fprintf('Min/Mean/Median/Max.........%.3f/%.3f/%.3f/%.3f usec\n', ...
 
 % Convert the LFP signal from digital units to uV.
 adMaxValue = 32767;
-inputRange = 200.0;
+inputRange = 1000.0;
 rawSignal  = inputRange * rawSignal / adMaxValue;
 
 fprintf('ALWAYS CONFIRM THE FOLLOWING VALUES AND, WHEN NEEDED, CORRECT!\n');
@@ -78,5 +78,5 @@ disp(header);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-clear fileName dirName channel frequency validSamples samplingFreq numRecord;
-clear timeOrigin dt dtStatistics adMaxValue inputRange;
+clear fileName dirName channel frequency validSamples numRecord timeOrigin;
+clear dt dtStatistics adMaxValue inputRange;
