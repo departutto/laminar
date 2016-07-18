@@ -128,5 +128,3 @@ else
     selectedSpikeTimestampIndices = timings(selectedSpikeIndices);
     selectedSpikeTimestampsInUsec = timeStamps(selectedSpikeTimestampIndices);
 end
-
-selectedSpikeTimestampsInSec = (selectedSpikeTimestampsInUsec - timeStamps(1)) / 10 ^ 6;
