@@ -55,7 +55,7 @@
  plot([31 31], get(gca, 'YLim'), '--k');
  plot([61 61], get(gca, 'YLim'), '--k');
  xlabel('time, ms'), ylabel('firing rate, spikes/sec');
- title('Pooling across all conditions');
+ title('Pooling across selected conditions');
  
  clear descriptors counter indices ok currentIndex nRows nCols;
  
