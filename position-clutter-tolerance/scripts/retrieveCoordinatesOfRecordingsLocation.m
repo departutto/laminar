@@ -1,35 +1,67 @@
-% Coordinates of the most anterior reference point.
-xa = 564;  % units
-za = 317;  % units
-
-% Coordinates of the most medial reference point.
-xb = 462;  % units
-zb = 123;  % units
-
-% Coordinates of the most posterior reference point.
-xc = 577;  % units
-zc = 58;   % units
-
-% Distance from the reference points to the electrode penetration location.
-la = 5.60; % mm
-lb = 6.30; % mm
-lc = 4.49; % mm
-
-% Conversion rate from units to mm.
+% Conversion rate (coefficient) from units to mm.
 k  = 35.524 / 1000;
 
-res = [];
-for x = xb:730
-    fprintf('%03d', x);
-    for z = zc:za
-        ta  = k * sqrt((xa - x) ^ 2 + (za - z) ^ 2);
-        tb  = k * sqrt((xb - x) ^ 2 + (zb - z) ^ 2);
-        tc  = k * sqrt((xc - x) ^ 2 + (zc - z) ^ 2);
-        err = ((ta - la) ^ 2 + (tb - lb) ^ 2 + (tc - lc) ^ 2) / 3.0;
-        res(end + 1, :) = [x z err];
-    end
-    fprintf('\b\b\b');
-end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rat 68967; August 11, 2016.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          AP: 00.00 (mm)  LM: 00.00 (mm)  AP: 000 (units)  LM: 000 (units)
+references = [ 12.10           26.35           231              639; ... % anterior reference point
+               12.50           19.75           208              448; ... % medial reference point
+               14.80           23.25           148              542; ... % posterior reference point
+               12.30           22.75          -999             -999];    % penetration location
+aprange    = [130 370];     % units 
+lmrange    = [430 640];     % units
+positions  = [0.0 0.0; ...  % AP/Y (mm) LM/X (mm)  
+              0.0 0.5; ...  % +0.5 mm lateral
+             -0.5 0.0];     % +0.5 mm anterior 
 
-[value, index] = min(res(:, 3));
-fprintf('\n[x, z] = [%d, %d]\n', res(index, 1), res(index, 2));
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rat 68967; August 16, 2016.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          AP: 00.00 (mm)  LM: 00.00 (mm)  AP: 000 (units)  LM: 000 (units)
+references = [ 13.22           26.98           231              639; ... % anterior reference point
+               13.52           20.29           208              448; ... % medial reference point
+               15.75           23.69           148              542; ... % posterior reference point
+               13.42           22.80          -999             -999];    % penetration location
+aprange    = [130 370];     % units 
+lmrange    = [430 640];     % units
+positions  = [0.0 0.0; ...  % AP/Y (mm) LM/X (mm)  
+              0.0 0.5; ...  % +0.5 mm lateral
+              0.0 1.0; ...  % +1.0 mm lateral
+              0.0 1.5; ...  % +1.5 mm lateral
+              0.0 2.0; ...  % +2.0 mm lateral
+              0.0 2.5; ...  % +2.5 mm lateral
+              0.7 2.5; ...  % +0.7 mm posterior, +2.5 mm lateral
+              0.7 2.0; ...  % +0.7 mm posterior, +2.0 mm lateral
+              0.7 1.0; ...  % +0.7 mm posterior, +1.0 mm lateral
+              0.7 0.0];     % +0.7 mm posterior
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+x0 = references(4, 2);
+y0 = references(4, 1);
+
+for counter = 1:size(positions, 1)
+    fprintf('Position #%d\n', counter);
+
+    errors = [];
+    xcurr  = x0 + positions(counter, 2);
+    ycurr  = y0 + positions(counter, 1);
+    
+    desired1 = sqrt((references(1, 1) - ycurr) ^2 + (references(1, 2) - xcurr) ^ 2);
+    desired2 = sqrt((references(2, 1) - ycurr) ^2 + (references(2, 2) - xcurr) ^ 2);
+    desired3 = sqrt((references(3, 1) - ycurr) ^2 + (references(3, 2) - xcurr) ^ 2);    
+    
+    for x = lmrange(1):lmrange(2)
+        for y = aprange(1):aprange(2)
+            estimated1 = k * sqrt((references(1, 3) - y) ^ 2 + (references(1, 4) - x) ^ 2);
+            estimated2 = k * sqrt((references(2, 3) - y) ^ 2 + (references(2, 4) - x) ^ 2);
+            estimated3 = k * sqrt((references(3, 3) - y) ^ 2 + (references(3, 4) - x) ^ 2);
+            errors(end + 1, :) = [x y ((estimated1 - desired1) ^ 2 + (estimated2 - desired2) ^ 2 + (estimated3 - desired3) ^ 2) / 3.0];
+        end
+    end
+    
+    [value, index] = min(errors(:, 3));
+    fprintf('Estimated coordinates (X, Y) = (%d, %d)\n', errors(index, 1), errors(index, 2));
+    
+end
