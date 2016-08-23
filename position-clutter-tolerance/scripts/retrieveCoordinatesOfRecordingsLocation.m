@@ -37,6 +37,25 @@ positions  = [0.0 0.0; ...  % AP/Y (mm) LM/X (mm)
               0.7 0.0];     % +0.7 mm posterior
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Rat 68967; August 23, 2016.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%          AP: 00.00 (mm)  LM: 00.00 (mm)  AP: 000 (units)  LM: 000 (units)
+references = [  9.50           24.17           231              639; ... % anterior reference point
+               10.03           17.45           208              448; ... % medial reference point
+               12.30           20.99           148              542; ... % posterior reference point
+               10.20           19.20          -999             -999];    % penetration location
+aprange    = [130 370];     % units 
+lmrange    = [430 640];     % units
+positions  = [0.0 0.0; ...  % AP/Y (mm) LM/X (mm)
+              0.0 0.5; ...  % +0.5 mm lateral, position #2
+              0.0 1.0; ...  % +1.0 mm lateral, position #3
+              0.7 1.0; ...  % +1.0 mm lateral, +0.7 mm posterior, position #4
+              0.7 0.5; ...  % +0.5 mm lateral, +0.7 mm posterior, position #5
+             -0.7 0.5; ...  % +0.5 mm lateral, +0.7 mm anterior, position #6
+             -0.7 1.0; ...  % +1.0 mm lateral, +0.7 mm anterior, position #7
+             -0.7 0.0];     % +0.7 mm anterior, position #8
+          
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 x0 = references(4, 2);
 y0 = references(4, 1);
